@@ -1,0 +1,66 @@
+version: '3.4'
+services:
+  master:
+    image: fjr19940207/hadoop:v1
+    hostname: hadoop-master
+    container_name: hadoop-master
+    privileged: true
+    tty: true
+    ports:
+     - "9870:9870"
+     - "8088:8088"
+     - "9083:9083"
+    volumes:
+    - "/opt/data_hadoop/master:/opt/hdfs"
+    - "/opt/data_hadoop/config/hadoop:/opt/hadoop/etc/hadoop"
+    command: /bin/bash -c "/usr/sbin/sshd -D & /opt/hadoop/sbin/start-all.sh && /opt/hive/bin/metastore & /opt/hive/bin/hiveserver2"
+
+  slave1:
+    image: fjr19940207/hadoop:v1
+    hostname: hadoop-slave1
+    container_name: hadoop-slave1
+    privileged: true
+    tty: true
+    volumes:
+    - "/opt/data_hadoop/slave1:/opt/hdfs"
+    - "/opt/data_hadoop/config/hadoop:/opt/hadoop/etc/hadoop"
+    command: /bin/bash -c "/usr/sbin/sshd -D "
+
+  slave2:
+    image: fjr19940207/hadoop:v1
+    hostname: hadoop-slave2
+    container_name: hadoop-slave2
+    privileged: true
+    tty: true
+    volumes:
+    - "/opt/data_hadoop/slave2:/opt/hdfs"
+    - "/opt/data_hadoop/config/hadoop:/opt/hadoop/etc/hadoop"
+    command: /bin/bash -c "/usr/sbin/sshd -D "
+
+  hue:
+    image: gethue/hue
+    hostname: hadoop-hue
+    container_name: hadoop-hue
+    ports:
+    - "8899:8888"
+    volumes:
+    - "/opt/data_hadoop/config/hue:/usr/share/hue/desktop/conf"
+
+  database:
+    image: mysql:5.7
+    hostname: hadoop-mysql
+    container_name: hadoop-mysql
+    environment:
+     MYSQL_ROOT_PASSWORD: 1q2w3e4r5t@Qwe
+    privileged: true
+    tty: true
+    ports:
+     - "33060:3306"
+    volumes:
+     - "/opt/data_hadoop/mysql:/var/lib/mysql"
+     - "/opt/data_hadoop/config/mysql:/docker-entrypoint-initdb.d"
+
+networks:
+  default:
+    external:
+      name: hadoop
